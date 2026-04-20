@@ -8,6 +8,7 @@ class BackendApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Método de test vacío
 	}
 
 }

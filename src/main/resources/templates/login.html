@@ -18,11 +18,15 @@
         <form class="box" th:action="@{/login}" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             
-            <label>Usuario</label>
-            <input type="text" name="username" autocomplete="username" required/>
+            <label>
+                Usuario
+                <input type="text" name="username" autocomplete="username" required/>
+            </label>
             
-            <label>Contraseña</label>
-            <input type="password" name="password" autocomplete="current-password" required/>
+            <label>
+                Contraseña
+                <input type="password" name="password" autocomplete="current-password" required/>
+            </label>
             
             <p class="error" th:if="${param.error}">Credenciales incorrectas.</p>
             <p class="flash" th:if="${param.logout}">Has cerrado sesión exitosamente.</p>
