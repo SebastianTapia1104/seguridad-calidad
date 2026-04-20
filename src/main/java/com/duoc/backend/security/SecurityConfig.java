@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,10 +35,11 @@ public class SecurityConfig {
 	 */
 	@Bean
 	@Order(1)
+	@SuppressWarnings("java:S4502")
 	public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
 		http
 				.securityMatcher("/api/**")
-				.csrf(csrf -> csrf.disable())
+				.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
@@ -48,9 +50,6 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	/**
-	 * Thymeleaf: sesiones + form login (todo lo que no sea /api/**).
-	 */
 	@Bean
 	@Order(2)
 	public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
