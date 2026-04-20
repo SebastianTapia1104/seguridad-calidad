@@ -12,14 +12,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice(basePackages = "com.duoc.backend.rest")
 public class GlobalRestExceptionHandler {
 
+	private static final String ERROR_STRING = "error";
+
 	@ExceptionHandler(BadCredentialsException.class)
 	public ResponseEntity<Map<String, String>> badCredentials(BadCredentialsException ex) {
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", ex.getMessage()));
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(ERROR_STRING, ex.getMessage()));
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<Map<String, String>> illegalArgument(IllegalArgumentException ex) {
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_STRING, ex.getMessage()));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -28,6 +30,6 @@ public class GlobalRestExceptionHandler {
 				.map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
 				.findFirst()
 				.orElse("Datos inválidos");
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", msg));
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_STRING, msg));
 	}
 }

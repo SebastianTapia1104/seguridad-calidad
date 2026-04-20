@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private static final String LOGIN_URL = "/login";
 
 	public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -30,9 +31,6 @@ public class SecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
-	/**
-	 * APIs REST: stateless + JWT. Rutas públicas explícitas.
-	 */
 	@Bean
 	@Order(1)
 	@SuppressWarnings("java:S4502")
@@ -56,13 +54,13 @@ public class SecurityConfig {
 		http
 				.securityMatcher(request -> !request.getRequestURI().startsWith("/api"))
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/", "/buscar", "/login", "/error", "/css/**", "/js/**", "/images/**")
+						.requestMatchers("/", "/buscar", LOGIN_URL, "/error", "/css/**", "/js/**", "/images/**")
 						.permitAll()
 						.requestMatchers("/admin/**").hasRole("ADMIN")
 						.anyRequest().authenticated())
 				.formLogin(form -> form
-						.loginPage("/login")
-						.loginProcessingUrl("/login")
+						.loginPage(LOGIN_URL)
+						.loginProcessingUrl(LOGIN_URL)
 						.defaultSuccessUrl("/admin/mascotas", true)
 						.permitAll())
 				.logout(logout -> logout
