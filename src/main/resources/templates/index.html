@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Patitas DUOC - Catálogo de Adopción</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+  <link rel="stylesheet" th:href="@{/css/navbar.css}"/>
+</head>
+<body>
+  <!-- Fragmento de navegación -->
+  <div th:replace="~{fragments/navbar :: header}"></div>
+  
+  <!-- Contenedor principal -->
+  <main>
+    <h1>Bienvenido al Catálogo de Mascotas</h1>
+    <p class="welcome-text">
+      Encuentra tu compañero perfecto entre nuestras mascotas disponibles para adopción. 
+      Cada una de ellas busca un hogar lleno de amor y cuidado.
+    </p>
+    
+    <!-- Grid de mascotas -->
+    <div class="grid" th:if="${mascotas != null and !#lists.isEmpty(mascotas)}">
+      <article class="card" th:each="m : ${mascotas}">
+        <img th:src="${m.fotoUrl != null ? m.fotoUrl : 'https://placehold.co/400x300?text=Mascota'}" alt="foto"/>
+        <div class="card-body">
+          <h2 th:text="${m.nombre}">Nombre</h2>
+          <p>
+            <span class="badge" th:text="${m.especie}">especie</span>
+            <span class="badge" th:text="${m.genero}">gen</span>
+          </p>
+          <p style="font-size:0.9rem" th:text="${m.ubicacion}">ubicación</p>
+          <p><strong>Estado:</strong> <span th:text="${m.estadoAdopcion}">estado</span></p>
+        </div>
+      </article>
+    </div>
+    
+    <!-- Mensaje cuando no hay mascotas -->
+    <div th:if="${mascotas == null or #lists.isEmpty(mascotas)}">
+      <div style="text-align: center; padding: 3rem; background: #1e293b; border-radius: 12px; border: 1px solid #334155;">
+        <h2 style="color: #ffffff; margin-bottom: 1rem;">No hay mascotas disponibles</h2>
+        <p style="color: #94a3b8; font-size: 1.1rem;">
+          Las mascotas aparecerán aquí una vez que se hayan agregado al sistema.
+        </p>
+        <a th:href="@{/admin/mascotas}" 
+           class="btn" 
+           style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px;"
+           sec:authorize="hasRole('ADMIN')">
+          Agregar Mascotas
+        </a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

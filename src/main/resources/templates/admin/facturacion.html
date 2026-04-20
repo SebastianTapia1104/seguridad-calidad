@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Facturación — Patitas DUOC</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+  <link rel="stylesheet" th:href="@{/css/navbar.css}"/>
+  <style>
+    .detalle-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+      align-items: center;
+    }
+    .detalle-row input[type="text"] {
+      flex: 2;
+    }
+    .detalle-row input[type="number"] {
+      flex: 1;
+    }
+    .btn-remove {
+      background: #be123c;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+    .btn-add {
+      background: #059669;
+      color: white;
+      margin-bottom: 1rem;
+    }
+    .factura-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid #334155;
+    }
+    .factura-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #334155;
+    }
+    .factura-total {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .detalle-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #334155;
+    }
+    .detalle-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <div th:replace="~{fragments/navbar :: header}"></div>
+  
+  <main>
+    <h1>Facturación y Visitas Médicas</h1>
+    
+    <div class="flash" th:if="${msg}" th:text="${msg}"></div>
+    <div class="flash" th:if="${error}" th:text="${error}" style="background: #be123c; color: #fecaca;"></div>
+    
+    <!-- Formulario para generar nueva factura -->
+    <section style="margin-bottom: 2rem;">
+      <h2>Generar Nueva Factura</h2>
+      <form class="box" th:action="@{/admin/facturacion/generar}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        
+        <label>Seleccionar Visita</label>
+        <select name="visitaId" required>
+          <option value="">-- Seleccione una visita --</option>
+          <option th:each="v : ${visitas}" th:value="${v.id}" th:text="${v.mascota.nombre + ' - ' + v.motivo + ' (' + #temporals.format(v.fecha, 'dd/MM/yyyy HH:mm') + ')'}">
+            Mascota - Motivo (Fecha)
+          </option>
+        </select>
+        <p th:if="${#lists.isEmpty(visitas)}" style="color: var(--muted); font-size: 0.9rem;">
+          No hay visitas pendientes de facturación.
+        </p>
+        
+        <label>Conceptos de Cobro</label>
+        <div id="detalles-container">
+          <div class="detalle-row">
+            <input type="text" name="conceptos" placeholder="Concepto (ej: Consulta)" required/>
+            <input type="number" name="montos" placeholder="Monto" step="0.01" min="0" required/>
+            <button type="button" class="btn btn-remove" onclick="eliminarFila(this)">Eliminar</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-add" onclick="agregarFila()">+ Agregar Concepto</button>
+        
+        <label style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+          <input type="checkbox" name="enviarEmail" value="true" style="width: auto; margin-bottom: 0;"/>
+          <span>Enviar factura por email al dueño</span>
+        </label>
+        
+        <button type="submit" style="margin-top: 1rem;">Generar Factura</button>
+      </form>
+    </section>
+    
+    <!-- Listado de facturas existentes -->
+    <section>
+      <h2>Facturas Generadas</h2>
+      <div th:if="${#lists.isEmpty(facturas)}" style="text-align: center; padding: 2rem; color: var(--muted);">
+        <p>No hay facturas generadas aún.</p>
+      </div>
+      
+      <div th:each="f : ${facturas}" class="factura-card">
+        <div class="factura-header">
+          <div>
+            <strong>Factura #<span th:text="${f.id}">1</span></strong>
+            <span style="color: var(--muted); margin-left: 1rem;" th:text="${#temporals.format(f.fechaEmision, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+          </div>
+          <div class="factura-total" th:text="'$' + ${f.total}">$0.00</div>
+        </div>
+        
+        <div style="margin-bottom: 0.75rem;">
+          <strong>Mascota:</strong> <span th:text="${f.visita.mascota.nombre}">Nombre</span><br/>
+          <strong>Veterinario:</strong> <span th:text="${f.visita.veterinario.username}">Vet</span><br/>
+          <strong>Motivo:</strong> <span th:text="${f.visita.motivo}">Motivo</span>
+        </div>
+        
+        <div style="border-top: 1px solid #334155; padding-top: 0.75rem;">
+          <strong>Detalles:</strong>
+          <div th:each="d : ${f.detalles}" class="detalle-item">
+            <span th:text="${d.concepto}">Concepto</span>
+            <span th:text="'$' + ${d.monto}">$0.00</span>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+          <a th:href="@{/api/facturas/{id}/imprimir(id=${f.id})}" class="btn secondary" target="_blank">Descargar PDF</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <script>
+    function agregarFila() {
+      const container = document.getElementById('detalles-container');
+      const row = document.createElement('div');
+      row.className = 'detalle-row';
+      row.innerHTML = `
+        <input type="text" name="conceptos" placeholder="Concepto (ej: Consulta)" required/>
+        <input type="number" name="montos" placeholder="Monto" step="0.01" min="0" required/>
+        <button type="button" class="btn btn-remove" onclick="eliminarFila(this)">Eliminar</button>
+      `;
+      container.appendChild(row);
+    }
+    
+    function eliminarFila(button) {
+      const container = document.getElementById('detalles-container');
+      if (container.children.length > 1) {
+        button.parentElement.remove();
+      } else {
+        alert('Debe haber al menos un concepto');
+      }
+    }
+  </script>
+</body>
+</html>

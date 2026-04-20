@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Buscar - Patitas DUOC</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+    
+    <div th:replace="~{fragments/navbar :: header}"></div>
+
+    <main>
+        <h1>Encuentra tu mascota</h1>
+        
+        <form class="search" th:action="@{/buscar}" method="get">
+            <label>Especie</label>
+            <input type="text" name="especie" th:value="${especie}" placeholder="Ej: Perro"/>
+            
+            <label>Ubicación</label>
+            <input type="text" name="ubicacion" th:value="${ubicacion}" placeholder="Ej: Santiago"/>
+            
+            <button type="submit" class="btn">Buscar</button>
+        </form>
+
+        <div class="grid" th:if="${mascotas != null}">
+            <article class="card" th:each="m : ${mascotas}">
+                <img th:src="${m.fotoUrl != null ? m.fotoUrl : 'https://placehold.co/400x300?text=Mascota'}" alt="foto"/>
+                <div class="card-body">
+                    <h2 th:text="${m.nombre}">Nombre</h2>
+                    <p><span class="badge" th:text="${m.especie}"></span></p>
+                    <p th:text="${m.ubicacion}"></p>
+                </div>
+            </article>
+        </div>
+    </main>
+
+</body>
+</html>

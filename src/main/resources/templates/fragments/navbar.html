@@ -1,0 +1,20 @@
+<header class="site" th:fragment="header" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <div>
+        <a th:href="@{/}"><strong>Patitas DUOC</strong></a>
+    </div>
+    
+    <nav>
+        <a th:href="@{/}">Inicio</a>
+        <a th:href="@{/buscar}">Búsqueda</a>
+        
+        <a th:href="@{/admin/mascotas}" sec:authorize="isAuthenticated()">Gestión</a>
+        <a th:href="@{/admin/facturacion}" sec:authorize="hasRole('ADMIN')">Facturación</a>
+        
+        <a th:href="@{/login}" sec:authorize="!isAuthenticated()" class="btn">Iniciar Sesión</a>
+        
+        <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" style="display:inline; margin-left: 1rem;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="btn danger">Cerrar Sesión</button>
+        </form>
+    </nav>
+</header>
