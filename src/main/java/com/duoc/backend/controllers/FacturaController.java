@@ -59,7 +59,7 @@ public class FacturaController {
             @RequestParam Long visitaId,
             @RequestParam List<String> conceptos,
             @RequestParam List<BigDecimal> montos,
-            @RequestParam(required = false) boolean enviarEmail,
+            @RequestParam(required = false) Boolean enviarEmail,
             RedirectAttributes redirectAttrs) {
         
         try {
