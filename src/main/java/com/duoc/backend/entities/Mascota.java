@@ -76,6 +76,11 @@ public class Mascota {
 		return id;
 	}
 
+	/** Necesario para binding de formularios MVC (Thymeleaf) al actualizar. */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public String getNombre() {
 		return nombre;
 	}

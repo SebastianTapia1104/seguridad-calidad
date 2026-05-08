@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.session.web.http.DefaultCookieSerializer;
+import org.springframework.session.web.http.CookieSerializer;
 
 @Configuration
 @EnableWebSecurity
@@ -53,6 +55,17 @@ public class SecurityConfig {
 	public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
 		http
 				.securityMatcher(request -> !request.getRequestURI().startsWith("/api"))
+				.headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; " +
+                                "script-src 'self'; " +
+                                "style-src 'self'; " +
+                                "img-src 'self' data:; " +
+                                "font-src 'self'; " +
+                                "form-action 'self'; " +
+                                "frame-ancestors 'self';"
+                        ))
+                )
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/", "/buscar", LOGIN_URL, "/error", "/css/**", "/js/**", "/images/**")
 						.permitAll()
@@ -69,4 +82,12 @@ public class SecurityConfig {
 						.permitAll());
 		return http.build();
 	}
+
+	@Bean
+    public CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setSameSite("Strict");
+        serializer.setUseSecureCookie(false); // Ponlo en true si usas HTTPS, pero en localhost es false
+        return serializer;
+    }
 }
